@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planner de Rotina TEA – Cartões Imprimíveis</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap');
+
+  :root {
+    --boy-primary: #3A86FF;
+    --boy-secondary: #8338EC;
+    --boy-accent: #06D6A0;
+    --boy-warm: #FFB703;
+    --boy-bg: #EBF4FF;
+
+    --girl-primary: #FF006E;
+    --girl-secondary: #FB5607;
+    --girl-accent: #FFBE0B;
+    --girl-warm: #8338EC;
+    --girl-bg: #FFF0F6;
+
+    --school-primary: #2EC4B6;
+    --school-secondary: #FF9F1C;
+    --school-bg: #F0FFF9;
+
+    --card-w: 160px;
+    --card-h: 190px;
+    --radius: 20px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #F7F3FF;
+    color: #1a1a2e;
+  }
+
+  /* ========== SCREEN: CAPA / NAVEGAÇÃO ========== */
+  .screen-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .screen-nav h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 2.6rem;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    margin-bottom: 10px;
+  }
+
+  .screen-nav p {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 40px;
+    max-width: 500px;
+  }
+
+  .nav-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    max-width: 800px;
+  }
+
+  .nav-card {
+    background: white;
+    border-radius: 24px;
+    padding: 30px 24px;
+    width: 220px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .nav-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+  }
+
+  .nav-card .nav-emoji { font-size: 3.5rem; display: block; margin-bottom: 12px; }
+  .nav-card h3 { font-family: 'Baloo 2', cursive; font-size: 1.2rem; margin-bottom: 6px; }
+  .nav-card p { font-size: 0.85rem; color: #666; }
+
+  .nav-card.boy { border-top: 6px solid var(--boy-primary); }
+  .nav-card.girl { border-top: 6px solid var(--girl-primary); }
+  .nav-card.school-b { border-top: 6px solid var(--school-primary); }
+  .nav-card.school-g { border-top: 6px solid var(--girl-warm); }
+
+  .btn-back {
+    background: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    display: none;
+  }
+
+  /* ========== SCREENS ========== */
+  .screen { display: none; padding: 20px; }
+  .screen.active { display: block; }
+  .screen-home.active { display: flex; }
+
+  /* ========== PRINT SHEET ========== */
+  .sheet-header {
+    text-align: center;
+    padding: 24px 20px 16px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+
+  .sheet-header h2 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 2rem;
+  }
+
+  .sheet-header p {
+    font-size: 0.95rem;
+    margin-top: 6px;
+    opacity: 0.85;
+  }
+
+  /* ========== ROTINA BOARD ========== */
+  .routine-board {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+  }
+
+  .routine-board h3 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .time-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .time-badge {
+    background: #1a1a2e;
+    color: #fff;
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-weight: 800;
+    font-size: 1rem;
+    min-width: 70px;
+    text-align: center;
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .card-slot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ========== CARD ========== */
+  .card {
+    width: var(--card-w);
+    min-height: var(--card-h);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 10px 12px;
+    box-shadow: var(--shadow);
+    position: relative;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .card-emoji {
+    font-size: 3.4rem;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .card-label {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    text-align: center;
+    line-height: 1.3;
+    flex: 1;
+  }
+
+  .card-velcro {
+    width: 36px;
+    height: 10px;
+    background: repeating-linear-gradient(
+      45deg,
+      #ddd,
+      #ddd 2px,
+      #bbb 2px,
+      #bbb 4px
+    );
+    border-radius: 4px;
+    margin-top: 8px;
+    opacity: 0.6;
+  }
+
+  .card-step {
+    font-size: 0.72rem;
+    color: rgba(0,0,0,0.55);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  /* ========== CARDS GRID ========== */
+  .cards-section {
+    margin-bottom: 32px;
+  }
+
+  .cards-section h3 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.3rem;
+    margin-bottom: 14px;
+    padding-left: 4px;
+  }
+
+  .cards-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  /* ========== VELCRO BOARD TEMPLATE ========== */
+  .velcro-board {
+    background: white;
+    border: 3px dashed #ccc;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 28px;
+    page-break-inside: avoid;
+  }
+
+  .velcro-board h3 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.2rem;
+    text-align: center;
+    margin-bottom: 14px;
+    color: #666;
+  }
+
+  .velcro-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .velcro-time {
+    font-weight: 800;
+    font-size: 1rem;
+    min-width: 65px;
+    background: #f0f0f0;
+    border-radius: 10px;
+    padding: 5px 10px;
+    text-align: center;
+  }
+
+  .velcro-slot {
+    width: 72px;
+    height: 72px;
+    background: #f8f8f8;
+    border: 2px dashed #ccc;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    color: #bbb;
+    text-align: center;
+  }
+
+  /* ========== BOY THEME ========== */
+  .boy-theme .sheet-header { background: linear-gradient(135deg, var(--boy-primary), var(--boy-secondary)); color: white; }
+  .boy-theme .routine-board h3 { color: var(--boy-primary); }
+  .boy-theme .time-badge { background: var(--boy-secondary); }
+
+  .card-boy-blue { background: linear-gradient(145deg, #EBF4FF, #D0E8FF); color: #1a3a6b; }
+  .card-boy-purple { background: linear-gradient(145deg, #F0E8FF, #DDD0FF); color: #3a1a6b; }
+  .card-boy-green { background: linear-gradient(145deg, #E6FFF8, #C0FFE8); color: #0a4a35; }
+  .card-boy-yellow { background: linear-gradient(145deg, #FFFBE6, #FFE8A0); color: #5a4000; }
+  .card-boy-orange { background: linear-gradient(145deg, #FFF3E6, #FFD0A0); color: #5a2a00; }
+  .card-boy-teal { background: linear-gradient(145deg, #E0FFFE, #B0F0EE); color: #0a3a38; }
+
+  /* ========== GIRL THEME ========== */
+  .girl-theme .sheet-header { background: linear-gradient(135deg, var(--girl-primary), var(--girl-warm)); color: white; }
+  .girl-theme .routine-board h3 { color: var(--girl-primary); }
+  .girl-theme .time-badge { background: var(--girl-warm); }
+
+  .card-girl-pink { background: linear-gradient(145deg, #FFF0F6, #FFD0E8); color: #6b0a35; }
+  .card-girl-purple { background: linear-gradient(145deg, #F5E8FF, #E0C0FF); color: #3a0a6b; }
+  .card-girl-yellow { background: linear-gradient(145deg, #FFFCE6, #FFEE99); color: #5a4000; }
+  .card-girl-coral { background: linear-gradient(145deg, #FFF0EE, #FFD0C8); color: #6b1500; }
+  .card-girl-mint { background: linear-gradient(145deg, #E8FFF5, #C0FFE0); color: #0a4a30; }
+  .card-girl-lavender { background: linear-gradient(145deg, #F0F0FF, #D8D0FF); color: #2a1a5a; }
+
+  /* ========== SCHOOL THEME ========== */
+  .school-boy-theme .sheet-header { background: linear-gradient(135deg, #2EC4B6, #3A86FF); color: white; }
+  .school-boy-theme .time-badge { background: #2EC4B6; }
+
+  .school-girl-theme .sheet-header { background: linear-gradient(135deg, #FF6B9D, #C44DFF); color: white; }
+  .school-girl-theme .time-badge { background: #C44DFF; }
+
+  .card-school-teal { background: linear-gradient(145deg, #E0FFFD, #B0F0EC); color: #0a3a38; }
+  .card-school-blue { background: linear-gradient(145deg, #E8F4FF, #C8E4FF); color: #0a2a5a; }
+  .card-school-orange { background: linear-gradient(145deg, #FFF5E0, #FFE0A0); color: #5a3000; }
+  .card-school-green { background: linear-gradient(145deg, #EAFFEE, #C0FFD0); color: #0a4020; }
+  .card-school-purple { background: linear-gradient(145deg, #F8F0FF, #E0C8FF); color: #3a0a6b; }
+  .card-school-red { background: linear-gradient(145deg, #FFF0F0, #FFD0D0); color: #6b0a0a; }
+
+  /* ========== INSTRUCTIONS ========== */
+  .instructions {
+    background: #FFFDE7;
+    border: 2px solid #FFE082;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .instructions h4 { font-family: 'Baloo 2', cursive; margin-bottom: 8px; color: #795548; }
+  .instructions ol { padding-left: 20px; }
+
+  /* ========== PRINT ========== */
+  .print-btn {
+    background: #2EC4B6;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 32px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(46,196,182,0.4);
+    display: block;
+    margin: 0 auto 30px;
+    transition: transform 0.15s;
+  }
+  .print-btn:hover { transform: scale(1.05); }
+
+  .section-divider {
+    text-align: center;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem;
+    color: #888;
+    margin: 24px 0 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ========== PRINT MEDIA ========== */
+  @media print {
+    .screen-home, .btn-back, .print-btn { display: none !important; }
+    .screen { display: block !important; padding: 0; }
+    .screen:not(.active) { display: none !important; }
+    body { background: white; }
+    .cards-grid { gap: 8px; }
+    .card { box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .routine-board { box-shadow: none; border: 1px solid #eee; }
+    @page { margin: 15mm; size: A4; }
+  }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 600px) {
+    :root { --card-w: 130px; --card-h: 160px; }
+    .screen-nav h1 { font-size: 1.8rem; }
+    .nav-cards { gap: 12px; }
+    .nav-card { width: 160px; padding: 20px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== HOME ==================== -->
+<div class="screen screen-home active" id="screen-home">
+  <div class="screen-nav">
+    <h1>🧩 Planner de Rotina TEA</h1>
+    <p>Cartões visuais imprimíveis para organizar a rotina de crianças no espectro autista</p>
+    <div class="nav-cards">
+      <div class="nav-card boy" onclick="showScreen('screen-boy')">
+        <span class="nav-emoji">🚀</span>
+        <h3>Rotina em Casa</h3>
+        <p style="color:#3A86FF; font-weight:700;">Menino</p>
+        <p>Acordar até dormir · 30+ cartões</p>
+      </div>
+      <div class="nav-card girl" onclick="showScreen('screen-girl')">
+        <span class="nav-emoji">🌸</span>
+        <h3>Rotina em Casa</h3>
+        <p style="color:#FF006E; font-weight:700;">Menina</p>
+        <p>Acordar até dormir · 30+ cartões</p>
+      </div>
+      <div class="nav-card school-b" onclick="showScreen('screen-school-boy')">
+        <span class="nav-emoji">🎒</span>
+        <h3>Rotina na Escola</h3>
+        <p style="color:#2EC4B6; font-weight:700;">Menino</p>
+        <p>Entrada até saída · 30+ cartões</p>
+      </div>
+      <div class="nav-card school-g" onclick="showScreen('screen-school-girl')">
+        <span class="nav-emoji">🌈</span>
+        <h3>Rotina na Escola</h3>
+        <p style="color:#C44DFF; font-weight:700;">Menina</p>
+        <p>Entrada até saída · 30+ cartões</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== BOY HOME ==================== -->
+<div class="screen boy-theme" id="screen-boy">
+  <button class="btn-back" onclick="showScreen('screen-home')" style="display:block;">← Voltar</button>
+  <button class="print-btn" onclick="window.print()">🖨️ Imprimir Planner do Menino</button>
+
+  <div class="sheet-header">
+    <h2>🚀 Minha Rotina em Casa — Menino</h2>
+    <p>Cartões para imprimir, plastificar e fixar com velcro</p>
+  </div>
+
+  <div class="instructions">
+    <h4>📋 Como usar este Planner:</h4>
+    <ol>
+      <li>Imprima este arquivo em papel A4 cartão (120–180g) ou papel comum e cole em cartão</li>
+      <li>Plastifique cada cartão individualmente (plastificadora ou plástico adesivo)</li>
+      <li>Cole um pedaço de velcro (lado macio) no verso de cada cartão</li>
+      <li>Cole o lado duro do velcro no painel/quadro de rotina na parede</li>
+      <li>A criança move os cartões de "Para Fazer" para "Fiz!" ao concluir cada tarefa</li>
+    </ol>
+  </div>
+
+  <!-- QUADRO MODELO -->
+  <div class="velcro-board">
+    <h3>📌 Modelo do Quadro de Velcro (imprimir e colar na parede)</h3>
+    <div style="display:flex; gap:30px; flex-wrap:wrap; justify-content:center;">
+      <div>
+        <div style="text-align:center; font-weight:800; color:#3A86FF; margin-bottom:8px; font-size:1rem;">⏳ PARA FAZER</div>
+        <div class="velcro-row"><div class="velcro-time">7:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">8:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">12:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">17:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">18:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">20:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">21:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+      </div>
+      <div>
+        <div style="text-align:center; font-weight:800; color:#06D6A0; margin-bottom:8px; font-size:1rem;">✅ FIZ!</div>
+        <div style="width:120px; min-height:300px; background:#f0fff8; border: 2px dashed #06D6A0; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:0.8rem; text-align:center; padding:10px;">Cartões concluídos vão aqui!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS MENINO CASA -->
+  <div class="cards-section">
+    <h3 style="color:#3A86FF;">🌅 Manhã — Acordar e Preparar</h3>
+    <div class="cards-grid">
+      <div class="card card-boy-yellow">
+        <div class="card-emoji">⏰</div>
+        <div class="card-label">Hora de Acordar!</div>
+        <div class="card-step">7:00</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-blue">
+        <div class="card-emoji">🛏️</div>
+        <div class="card-label">Levantar da Cama</div>
+        <div class="card-step">Coloca os pés no chão</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-orange">
+        <div class="card-emoji">🚽</div>
+        <div class="card-label">Fazer Xixi</div>
+        <div class="card-step">Vá ao banheiro</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-teal">
+        <div class="card-emoji">🪥</div>
+        <div class="card-label">Pegar a Escova</div>
+        <div class="card-step">Escovar os dentes — passo 1</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-blue">
+        <div class="card-emoji">🧴</div>
+        <div class="card-label">Colocar o Creme</div>
+        <div class="card-step">Escovar os dentes — passo 2</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-green">
+        <div class="card-emoji">😬</div>
+        <div class="card-label">Escovar os Dentes</div>
+        <div class="card-step">Cima, baixo e dos lados — 2 min</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-teal">
+        <div class="card-emoji">🌊</div>
+        <div class="card-label">Enxaguar a Boca</div>
+        <div class="card-step">Escovar os dentes — passo 4</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-purple">
+        <div class="card-emoji">👕</div>
+        <div class="card-label">Trocar de Roupa</div>
+        <div class="card-step">Roupa limpa do dia</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-yellow">
+        <div class="card-emoji">🥐</div>
+        <div class="card-label">Tomar Café da Manhã</div>
+        <div class="card-step">Sentar à mesa e comer</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-orange">
+        <div class="card-emoji">💧</div>
+        <div class="card-label">Beber Água</div>
+        <div class="card-step">Um copo cheio</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#8338EC;">🎒 Ir para a Escola</h3>
+    <div class="cards-grid">
+      <div class="card card-boy-purple">
+        <div class="card-emoji">🎒</div>
+        <div class="card-label">Pegar a Mochila</div>
+        <div class="card-step">Conferir o material</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-blue">
+        <div class="card-emoji">👟</div>
+        <div class="card-label">Colocar os Sapatos</div>
+        <div class="card-step">Amarrar o cadarço</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-green">
+        <div class="card-emoji">🚗</div>
+        <div class="card-label">Ir para a Escola</div>
+        <div class="card-step">Sentar e colocar o cinto</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+    <h3 style="color:#06D6A0;">🌞 Tarde — Chegando em Casa</h3>
+    <div class="cards-grid">
+      <div class="card card-boy-blue">
+        <div class="card-emoji">🏠</div>
+        <div class="card-label">Cheguei em Casa!</div>
+        <div class="card-step">Guardar a mochila</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-yellow">
+        <div class="card-emoji">🍎</div>
+        <div class="card-label">Comer uma Fruta</div>
+        <div class="card-step">Lanche da tarde saudável</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-orange">
+        <div class="card-emoji">💧</div>
+        <div class="card-label">Beber Água</div>
+        <div class="card-step">Hidratação</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-purple">
+        <div class="card-emoji">📚</div>
+        <div class="card-label">Fazer o Dever de Casa</div>
+        <div class="card-step">Sentar na mesa de estudos</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-green">
+        <div class="card-emoji">🧩</div>
+        <div class="card-label">Guardar o Material</div>
+        <div class="card-step">Organizar o caderno</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#FFB703;">⚡ Atividades e Terapia</h3>
+    <div class="cards-grid">
+      <div class="card card-boy-teal">
+        <div class="card-emoji">🧠</div>
+        <div class="card-label">Hora da Terapia</div>
+        <div class="card-step">ABA / Fonoaudiologia / Fono</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-blue">
+        <div class="card-emoji">📱</div>
+        <div class="card-label">Tempo do Tablet</div>
+        <div class="card-step">30 minutos combinados</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-purple">
+        <div class="card-emoji">📺</div>
+        <div class="card-label">Assistir TV</div>
+        <div class="card-step">Programa favorito</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-yellow">
+        <div class="card-emoji">🎮</div>
+        <div class="card-label">Brincar</div>
+        <div class="card-step">Brincadeira livre</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+    <h3 style="color:#3A86FF;">🌙 Noite — Jantar e Dormir</h3>
+    <div class="cards-grid">
+      <div class="card card-boy-blue">
+        <div class="card-emoji">🚿</div>
+        <div class="card-label">Hora do Banho</div>
+        <div class="card-step">Deixar a roupa suja no cesto</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-teal">
+        <div class="card-emoji">🧼</div>
+        <div class="card-label">Lavar o Cabelo</div>
+        <div class="card-step">Shampoozinho e condicionador</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-green">
+        <div class="card-emoji">🧖</div>
+        <div class="card-label">Secar o Corpo</div>
+        <div class="card-step">Com a toalha</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-purple">
+        <div class="card-emoji">👔</div>
+        <div class="card-label">Colocar o Pijama</div>
+        <div class="card-step">Roupinha do soninho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-yellow">
+        <div class="card-emoji">🍽️</div>
+        <div class="card-label">Jantar</div>
+        <div class="card-step">Sentar à mesa com a família</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-orange">
+        <div class="card-emoji">🥗</div>
+        <div class="card-label">Comer Legumes</div>
+        <div class="card-step">Um prato colorido</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-teal">
+        <div class="card-emoji">🪥</div>
+        <div class="card-label">Escovar os Dentes</div>
+        <div class="card-step">Depois do jantar — 2 min</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-blue">
+        <div class="card-emoji">📖</div>
+        <div class="card-label">Ler uma História</div>
+        <div class="card-step">Hora do relaxamento</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-purple">
+        <div class="card-emoji">🙏</div>
+        <div class="card-label">Dar Boa Noite</div>
+        <div class="card-step">Abraço e beijinho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-boy-green">
+        <div class="card-emoji">😴</div>
+        <div class="card-label">Hora de Dormir</div>
+        <div class="card-step">Luzes apagadas · 21:00</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== GIRL HOME ==================== -->
+<div class="screen girl-theme" id="screen-girl">
+  <button class="btn-back" onclick="showScreen('screen-home')" style="display:block;">← Voltar</button>
+  <button class="print-btn" onclick="window.print()" style="background: var(--girl-primary);">🖨️ Imprimir Planner da Menina</button>
+
+  <div class="sheet-header">
+    <h2>🌸 Minha Rotina em Casa — Menina</h2>
+    <p>Cartões para imprimir, plastificar e fixar com velcro</p>
+  </div>
+
+  <div class="instructions">
+    <h4>📋 Como usar este Planner:</h4>
+    <ol>
+      <li>Imprima em papel A4 cartão (120–180g) ou papel comum colado em cartão</li>
+      <li>Plastifique cada cartão individualmente</li>
+      <li>Cole velcro macio no verso dos cartões</li>
+      <li>Cole velcro duro no quadro fixado na parede</li>
+      <li>A criança move os cartões ao concluir cada tarefa 🎉</li>
+    </ol>
+  </div>
+
+  <!-- QUADRO MODELO MENINA -->
+  <div class="velcro-board" style="border-color: #FFB7C5;">
+    <h3 style="color: #FF006E;">🌸 Modelo do Quadro de Velcro</h3>
+    <div style="display:flex; gap:30px; flex-wrap:wrap; justify-content:center;">
+      <div>
+        <div style="text-align:center; font-weight:800; color:#FF006E; margin-bottom:8px;">⏳ PARA FAZER</div>
+        <div class="velcro-row"><div class="velcro-time" style="background:#FFE0F0;">7:00</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time" style="background:#FFE0F0;">8:00</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time" style="background:#FFE0F0;">13:00</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time" style="background:#FFE0F0;">17:00</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time" style="background:#FFE0F0;">19:00</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time" style="background:#FFE0F0;">21:00</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div><div class="velcro-slot" style="border-color:#FFB7C5;">cartão</div></div>
+      </div>
+      <div>
+        <div style="text-align:center; font-weight:800; color:#FFBE0B; margin-bottom:8px;">✅ FIZ! 🌟</div>
+        <div style="width:120px; min-height:280px; background:#fff8e0; border: 2px dashed #FFBE0B; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:0.8rem; text-align:center; padding:10px;">Cartões concluídos aqui! ⭐</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS MENINA CASA -->
+  <div class="cards-section">
+    <h3 style="color:#FF006E;">🌅 Manhã — Acordar e Preparar</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">⏰</div>
+        <div class="card-label">Hora de Acordar!</div>
+        <div class="card-step">7:00 ✨</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🛏️</div>
+        <div class="card-label">Levantar da Cama</div>
+        <div class="card-step">Coloca os pés no chão</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🚽</div>
+        <div class="card-label">Fazer Xixi</div>
+        <div class="card-step">Vá ao banheiro</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🪥</div>
+        <div class="card-label">Pegar a Escova</div>
+        <div class="card-step">Escovar os dentes — passo 1</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🧴</div>
+        <div class="card-label">Colocar o Creme</div>
+        <div class="card-step">Escovar os dentes — passo 2</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">😬</div>
+        <div class="card-label">Escovar os Dentes</div>
+        <div class="card-step">Cima, baixo e dos lados — 2 min</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🌊</div>
+        <div class="card-label">Enxaguar a Boca</div>
+        <div class="card-step">Escovar os dentes — passo 4</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-purple">
+        <div class="card-emoji">👗</div>
+        <div class="card-label">Trocar de Roupa</div>
+        <div class="card-step">Roupa linda do dia!</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">💇‍♀️</div>
+        <div class="card-label">Pentear o Cabelo</div>
+        <div class="card-step">Escova e prender se quiser</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🥞</div>
+        <div class="card-label">Tomar Café da Manhã</div>
+        <div class="card-step">Sentar à mesa e comer</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">💧</div>
+        <div class="card-label">Beber Água</div>
+        <div class="card-step">Um copo cheio</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#8338EC;">🎒 Ir para a Escola</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-purple">
+        <div class="card-emoji">🎒</div>
+        <div class="card-label">Pegar a Mochila</div>
+        <div class="card-step">Conferir o material</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-coral">
+        <div class="card-emoji">👟</div>
+        <div class="card-label">Colocar os Sapatos</div>
+        <div class="card-step">Amarrar ou velcro</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🚗</div>
+        <div class="card-label">Ir para a Escola</div>
+        <div class="card-step">Cinto de segurança!</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+    <h3 style="color:#FF006E;">🌞 Tarde — Chegando em Casa</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🏠</div>
+        <div class="card-label">Cheguei em Casa!</div>
+        <div class="card-step">Guardar a mochila</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🍇</div>
+        <div class="card-label">Comer uma Fruta</div>
+        <div class="card-step">Lanche saudável da tarde</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">💧</div>
+        <div class="card-label">Beber Água</div>
+        <div class="card-step">Hidratação</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">📚</div>
+        <div class="card-label">Fazer o Dever de Casa</div>
+        <div class="card-step">Sentar na mesa de estudos</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-purple">
+        <div class="card-emoji">✏️</div>
+        <div class="card-label">Guardar o Material</div>
+        <div class="card-step">Organizar o caderno</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#FB5607;">⚡ Atividades e Terapia</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🧠</div>
+        <div class="card-label">Hora da Terapia</div>
+        <div class="card-step">ABA / Fonoaudiologia</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">📱</div>
+        <div class="card-label">Tempo do Tablet</div>
+        <div class="card-step">30 minutinhos</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">📺</div>
+        <div class="card-label">Assistir TV</div>
+        <div class="card-step">Programa favorito</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🎨</div>
+        <div class="card-label">Brincar e Desenhar</div>
+        <div class="card-step">Brincadeira livre</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+    <h3 style="color:#FF006E;">🌙 Noite — Jantar e Dormir</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🛁</div>
+        <div class="card-label">Hora do Banho</div>
+        <div class="card-step">Roupinha suja no cesto</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🧼</div>
+        <div class="card-label">Lavar o Cabelo</div>
+        <div class="card-step">Shampoo e condicionador</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🧖‍♀️</div>
+        <div class="card-label">Secar o Corpo</div>
+        <div class="card-step">Com a toalha fofa</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-purple">
+        <div class="card-emoji">🌙</div>
+        <div class="card-label">Colocar o Pijama</div>
+        <div class="card-step">Roupinha do soninho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🍽️</div>
+        <div class="card-label">Jantar</div>
+        <div class="card-step">Sentar à mesa com a família</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-coral">
+        <div class="card-emoji">🥦</div>
+        <div class="card-label">Comer Legumes</div>
+        <div class="card-step">Prato colorido e saudável</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🪥</div>
+        <div class="card-label">Escovar os Dentes</div>
+        <div class="card-step">Depois do jantar — 2 min</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">📖</div>
+        <div class="card-label">Ler uma História</div>
+        <div class="card-step">Hora do relaxamento</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">💕</div>
+        <div class="card-label">Dar Boa Noite</div>
+        <div class="card-step">Abraço e beijinho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-purple">
+        <div class="card-emoji">😴</div>
+        <div class="card-label">Hora de Dormir</div>
+        <div class="card-step">Luzes apagadas · 21:00</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ESCOLA MENINO ==================== -->
+<div class="screen school-boy-theme" id="screen-school-boy">
+  <button class="btn-back" onclick="showScreen('screen-home')" style="display:block;">← Voltar</button>
+  <button class="print-btn" onclick="window.print()" style="background: #2EC4B6;">🖨️ Imprimir Rotina Escolar — Menino</button>
+
+  <div class="sheet-header">
+    <h2>🎒 Minha Rotina na Escola — Menino</h2>
+    <p>Cartões para imprimir, plastificar e fixar com velcro na mochila ou mesa</p>
+  </div>
+
+  <div class="instructions">
+    <h4>📌 Dica para a Escola:</h4>
+    <ol>
+      <li>Cole o quadro de velcro dentro da pasta ou na mesa da criança</li>
+      <li>A professora ou auxiliar ajuda a virar os cartões</li>
+      <li>Use cartões de cor diferente para cada disciplina</li>
+      <li>Adicione um cartão de "Parabéns!" para reforçar positivamente ao fim do dia</li>
+    </ol>
+  </div>
+
+  <!-- QUADRO ESCOLA -->
+  <div class="velcro-board">
+    <h3>📌 Quadro de Rotina da Sala de Aula</h3>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+      <div>
+        <div style="text-align:center; font-weight:800; color:#2EC4B6; margin-bottom:8px;">🕗 HORÁRIO DO DIA</div>
+        <div class="velcro-row"><div class="velcro-time">7:30</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">8:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">9:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">9:30</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">10:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">11:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+        <div class="velcro-row"><div class="velcro-time">12:00</div><div class="velcro-slot">cartão</div><div class="velcro-slot">cartão</div></div>
+      </div>
+      <div>
+        <div style="text-align:center; font-weight:800; color:#06D6A0; margin-bottom:8px;">✅ CONCLUÍ!</div>
+        <div style="width:120px; min-height:280px; background:#e6fff8; border:2px dashed #06D6A0; border-radius:16px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:0.8rem; text-align:center; padding:10px;">Atividades finalizadas aqui!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDS ESCOLA MENINO -->
+  <div class="cards-section">
+    <h3 style="color:#2EC4B6;">🏫 Chegada e Início do Dia</h3>
+    <div class="cards-grid">
+      <div class="card card-school-teal">
+        <div class="card-emoji">🚌</div>
+        <div class="card-label">Chegou na Escola!</div>
+        <div class="card-step">Descer do carro / ônibus</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-blue">
+        <div class="card-emoji">🎒</div>
+        <div class="card-label">Guardar a Mochila</div>
+        <div class="card-step">No armário ou gancho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-orange">
+        <div class="card-emoji">🪑</div>
+        <div class="card-label">Sentar na Cadeira</div>
+        <div class="card-step">Lugar na sala de aula</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-green">
+        <div class="card-emoji">👋</div>
+        <div class="card-label">Cumprimentar a Turma</div>
+        <div class="card-step">Bom dia, professora!</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-blue">
+        <div class="card-emoji">📓</div>
+        <div class="card-label">Tirar o Caderno</div>
+        <div class="card-step">Material na mesa</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-purple">
+        <div class="card-emoji">🗓️</div>
+        <div class="card-label">Roda de Conversa</div>
+        <div class="card-step">Ouvir a professora</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#3A86FF;">📝 Atividades na Sala</h3>
+    <div class="cards-grid">
+      <div class="card card-school-teal">
+        <div class="card-emoji">🔢</div>
+        <div class="card-label">Aula de Matemática</div>
+        <div class="card-step">Números e contas</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-blue">
+        <div class="card-emoji">📖</div>
+        <div class="card-label">Aula de Português</div>
+        <div class="card-step">Leitura e escrita</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-green">
+        <div class="card-emoji">🌍</div>
+        <div class="card-label">Aula de Ciências</div>
+        <div class="card-step">Natureza e descobertas</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-purple">
+        <div class="card-emoji">🎨</div>
+        <div class="card-label">Aula de Arte</div>
+        <div class="card-step">Criar e colorir</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-orange">
+        <div class="card-emoji">✏️</div>
+        <div class="card-label">Fazer a Atividade</div>
+        <div class="card-step">Completar a folha</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-teal">
+        <div class="card-emoji">🖊️</div>
+        <div class="card-label">Entregar para a Prof.</div>
+        <div class="card-step">Atividade concluída</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+    <h3 style="color:#FF9F1C;">🍎 Intervalo e Lanche</h3>
+    <div class="cards-grid">
+      <div class="card card-school-orange">
+        <div class="card-emoji">🔔</div>
+        <div class="card-label">Hora do Recreio!</div>
+        <div class="card-step">9:30 — Intervalo</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-teal">
+        <div class="card-emoji">🚽</div>
+        <div class="card-label">Ir ao Banheiro</div>
+        <div class="card-step">Lavar as mãos depois</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-green">
+        <div class="card-emoji">🥪</div>
+        <div class="card-label">Comer o Lanche</div>
+        <div class="card-step">Sentar e comer com calma</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-blue">
+        <div class="card-emoji">💧</div>
+        <div class="card-label">Beber Água</div>
+        <div class="card-step">No bebedouro ou garrafa</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-orange">
+        <div class="card-emoji">⚽</div>
+        <div class="card-label">Brincar no Pátio</div>
+        <div class="card-step">Com os amigos</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-purple">
+        <div class="card-emoji">🔔</div>
+        <div class="card-label">Voltou o Sinal</div>
+        <div class="card-step">Ir para a sala de aula</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#2EC4B6;">🏁 Final do Dia Escolar</h3>
+    <div class="cards-grid">
+      <div class="card card-school-teal">
+        <div class="card-emoji">🍽️</div>
+        <div class="card-label">Hora do Almoço</div>
+        <div class="card-step">Refeitório da escola</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-blue">
+        <div class="card-emoji">🪥</div>
+        <div class="card-label">Escovar os Dentes</div>
+        <div class="card-step">Após o almoço</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-green">
+        <div class="card-emoji">📓</div>
+        <div class="card-label">Copiar o Dever</div>
+        <div class="card-step">Agenda escolar</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-purple">
+        <div class="card-emoji">🎒</div>
+        <div class="card-label">Arrumar a Mochila</div>
+        <div class="card-step">Guardar tudo certinho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-orange">
+        <div class="card-emoji">👋</div>
+        <div class="card-label">Tchau, Professora!</div>
+        <div class="card-step">Se despedir da turma</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-teal">
+        <div class="card-emoji">🚗</div>
+        <div class="card-label">Ir para Casa</div>
+        <div class="card-step">Aguardar o responsável</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-school-green">
+        <div class="card-emoji">⭐</div>
+        <div class="card-label">Parabéns! Arrasou!</div>
+        <div class="card-step">Dia concluído com sucesso!</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ESCOLA MENINA ==================== -->
+<div class="screen school-girl-theme" id="screen-school-girl">
+  <button class="btn-back" onclick="showScreen('screen-home')" style="display:block;">← Voltar</button>
+  <button class="print-btn" onclick="window.print()" style="background: #C44DFF;">🖨️ Imprimir Rotina Escolar — Menina</button>
+
+  <div class="sheet-header">
+    <h2>🌈 Minha Rotina na Escola — Menina</h2>
+    <p>Cartões para imprimir, plastificar e fixar com velcro na mochila ou mesa</p>
+  </div>
+
+  <div class="instructions">
+    <h4>📌 Dica para a Escola:</h4>
+    <ol>
+      <li>Cole o quadro de velcro dentro da pasta ou na mesa</li>
+      <li>A professora ou auxiliar ajuda a virar os cartões</li>
+      <li>Cores diferentes para cada tipo de atividade</li>
+      <li>Cartão "Arrasou!" para reforço positivo ao fim do dia 🌟</li>
+    </ol>
+  </div>
+
+  <!-- CARDS ESCOLA MENINA -->
+  <div class="cards-section">
+    <h3 style="color:#FF6B9D;">🏫 Chegada e Início do Dia</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🚌</div>
+        <div class="card-label">Chegou na Escola!</div>
+        <div class="card-step">Descer do carro / ônibus</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🎒</div>
+        <div class="card-label">Guardar a Mochila</div>
+        <div class="card-step">No armário ou gancho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🪑</div>
+        <div class="card-label">Sentar na Cadeira</div>
+        <div class="card-step">Lugar na sala de aula</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🌸</div>
+        <div class="card-label">Cumprimentar a Turma</div>
+        <div class="card-step">Bom dia, professora!</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-purple">
+        <div class="card-emoji">📓</div>
+        <div class="card-label">Tirar o Caderno</div>
+        <div class="card-step">Material na mesa</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🗓️</div>
+        <div class="card-label">Roda de Conversa</div>
+        <div class="card-step">Ouvir a professora</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#C44DFF;">📝 Atividades na Sala</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🔢</div>
+        <div class="card-label">Aula de Matemática</div>
+        <div class="card-step">Números e contas</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">📖</div>
+        <div class="card-label">Aula de Português</div>
+        <div class="card-step">Leitura e escrita</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🌍</div>
+        <div class="card-label">Aula de Ciências</div>
+        <div class="card-step">Natureza e descobertas</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🎨</div>
+        <div class="card-label">Aula de Arte</div>
+        <div class="card-step">Criar e colorir</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-coral">
+        <div class="card-emoji">✏️</div>
+        <div class="card-label">Fazer a Atividade</div>
+        <div class="card-step">Completar a folha</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🌟</div>
+        <div class="card-label">Entregar para a Prof.</div>
+        <div class="card-step">Atividade concluída!</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-section">
+    <h3 style="color:#FB5607;">🍎 Intervalo e Lanche</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🔔</div>
+        <div class="card-label">Hora do Recreio!</div>
+        <div class="card-step">9:30 — Intervalo</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🚽</div>
+        <div class="card-label">Ir ao Banheiro</div>
+        <div class="card-step">Lavar as mãos depois</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🥪</div>
+        <div class="card-label">Comer o Lanche</div>
+        <div class="card-step">Sentar e comer com calma</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">💧</div>
+        <div class="card-label">Beber Água</div>
+        <div class="card-step">No bebedouro ou garrafa</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">🏃‍♀️</div>
+        <div class="card-label">Brincar no Pátio</div>
+        <div class="card-step">Com os amigos</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-coral">
+        <div class="card-emoji">🔔</div>
+        <div class="card-label">Voltou o Sinal</div>
+        <div class="card-step">Ir para a sala de aula</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider">✂️ · · · Recortar · · · ✂️</div>
+
+  <div class="cards-section">
+    <h3 style="color:#C44DFF;">🏁 Final do Dia Escolar</h3>
+    <div class="cards-grid">
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🍽️</div>
+        <div class="card-label">Hora do Almoço</div>
+        <div class="card-step">Refeitório da escola</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🪥</div>
+        <div class="card-label">Escovar os Dentes</div>
+        <div class="card-step">Após o almoço</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-lavender">
+        <div class="card-emoji">📓</div>
+        <div class="card-label">Copiar o Dever</div>
+        <div class="card-step">Agenda escolar</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-pink">
+        <div class="card-emoji">🎒</div>
+        <div class="card-label">Arrumar a Mochila</div>
+        <div class="card-step">Guardar tudo certinho</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-coral">
+        <div class="card-emoji">💕</div>
+        <div class="card-label">Tchau, Professora!</div>
+        <div class="card-step">Se despedir da turma</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-mint">
+        <div class="card-emoji">🚗</div>
+        <div class="card-label">Ir para Casa</div>
+        <div class="card-step">Aguardar o responsável</div>
+        <div class="card-velcro"></div>
+      </div>
+      <div class="card card-girl-yellow">
+        <div class="card-emoji">🌟</div>
+        <div class="card-label">Arrasou! Incrível!</div>
+        <div class="card-step">Dia concluído com sucesso!</div>
+        <div class="card-velcro"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
